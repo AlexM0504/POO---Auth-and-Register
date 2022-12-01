@@ -38,23 +38,28 @@ public:
 
 };
 
-
 class Trains{
 private:
     string orasPlecare;
     string orasDestinatie;
     int oraPlecare;
     int oraDestinatie;
-    int nrTren;
+    int zi;
+    int luna;
+    int an;
+    int NRCURSA;
 
 public: 
-    Trains(int nrT, string op , string od, int orap, int orad )
+    Trains(int z, int l , int a, string op , string od, int orap, int orad, int nrc)
     {
+    this->zi = z;
+    this->luna = l;
+    this->an = a;
     this->orasPlecare = op;
     this->orasDestinatie = od;
     this->oraPlecare = orap;
     this->oraDestinatie = orad;
-    this->nrTren = nrT;
+    this->NRCURSA = nrc;
     }
     
     void writeTrains(){
@@ -62,13 +67,12 @@ public:
 
         fileTrains.open("trains.csv",ios::out | ios::app);
 
-        fileTrains <<nrTren<<","<< orasPlecare << ","<< orasDestinatie<< "," << oraPlecare << "," << oraDestinatie<<"\n";
+        fileTrains <<zi<<","<< luna << ","<< an << "," << orasPlecare << "," << orasDestinatie<<","<<oraPlecare<<","<<oraDestinatie<<","<<NRCURSA<<"\n";
 
         fileTrains.close();
     }
 
 };
-
 
 void afisareCursa(){
 
@@ -95,25 +99,107 @@ void afisareCursa(){
         {
             row.push_back(word);
         }
-         cursa1 = row[1];
+
+         cursa1 = row[3];
 
         if(cursa1 == findCursa)
         {
-            cout<<row[0]<< " "<< row[1]<< " "<< row[2]<<" "<< row[3]<<" "<<row[4]<<"\n";
+            cout<<row[0]<< "-"<< row[1]<< "-"<< row[2]<<"|| "<< row[3]<<" -> "<<row[4]<<"  ||  "<<row[5]<<"->"<<row[6]<<"|| NR CURSA:"<<row[7]<<"\n";
+            
+            
+        }
+        else {
+            throw "Cursa nu a fost gasita";
+       
         }
        
     }
 
+    myfile.close();
 
+}
+
+void rezervareCursa()
+{
+    afisareCursa();
+
+
+    fstream myfile;
+    fstream fileTickets;
+
+    fileTickets.open("bilete.csv",ios::out | ios::app);
+    myfile.open("trains.csv",ios::in );
+
+    string line1,word1,cursa1;
+    vector<string> row1;
+
+    int nrCursaRez;
+
+    cout<<"Introduceti nr cursei pe care vreti sa o rezervati:  ";
+    cin>>nrCursaRez;
+
+    string nume,prenume;
+
+    cout<<"Introduceti prenumele de rezervare:  ";
+    
+    cin>>prenume;
+
+    cout<<"Introduceti numele de rezervare:  ";
+    
+    cin>>nume;
+    
+    int rezervare = 0;
+    
+    int nrcursadorita;
+
+
+    while(!myfile.eof())
+    {
+        row1.clear();
+        getline(myfile,line1);
+        stringstream s1(line1);
+
+        while(getline(s1,word1,','))
+        {
+            row1.push_back(word1);
+        }
+
+         nrcursadorita = stoi(row1[7]);
+
+        if(nrcursadorita == nrCursaRez)
+        {
+            fileTickets<< nume <<" "<<prenume << " a rezervat un bilet pt cursa " << nrcursadorita <<"\n";
+            rezervare = 1;
+            break;
+        }
+    
+       
+       
+    }
+  
+    if(rezervare)
+    {
+        cout<<"Rezervarea s-a facut cu succes";
+    }
+    else
+    {
+        cout<<"Cursa nu a fost gasita";
+    }
+    fileTickets.close();
+    myfile.close();
 }
 
 void adaugaCursa()
 {
     string op,od;
-    int orap, oradest, nrT;
+    int orap, oradest, ziua, luna ,an, nrc;
 
-    cout<<"Introduceti numarul trenului:";
-    cin>> nrT;
+    cout<<"Introduceti ziua :";
+    cin>> ziua;
+    cout<<"Introduceti luna :";
+    cin>> luna;
+    cout<<"Introduceti an :";
+    cin>> an;
     cout<<"Introduceti oras plecare:";
     cin>> op;
     cout<<"Introduceti oras destinatie: ";
@@ -122,12 +208,52 @@ void adaugaCursa()
     cin>> orap;
     cout<<"Introduceti ora destinatie:";
     cin>>oradest;
+    cout<<"Introduceti un nr de cursa:";
+    cin>>nrc;
 
-    Trains train1(nrT,op,od,orap,oradest);
-    train1.writeTrains();
+    fstream myfile;
+
+    myfile.open("trains.csv",ios::in);
+
+    int nrcursa1;
+     string line,word,cursa1;
+    vector<string> row;
+
+    while(!myfile.eof())        
+    {
+        row.clear();
+        getline(myfile,line);
+        stringstream s(line);
+
+        while(getline(s,word,','))
+        {
+            row.push_back(word);
+        }
+
+         nrcursa1 = stoi(row[7]);
+
+        if(nrcursa1 == nrc)
+        {
+            cout<<"Exista deja o cursa cu numarul de cursa introdus. ("<<nrc<<")";
+            break;
+        }
+        else {
+             if( orap < oradest ){
+            Trains train1(ziua,luna,an,op,od,orap,oradest,nrc);
+             train1.writeTrains();
+             break;
+             if(myfile.eof()) break;
+             }
+        else {
+        cout<<"Ora gresita";
+        }
+       
+        }
+       
+    }
+   
 
 }
-
 
 void deleteCursa()
 {
@@ -156,7 +282,7 @@ void deleteCursa()
 
         int row_size = row.size();
 
-        nrtren1 = stoi(row[0]); //conversie char to int 
+        nrtren1 = stoi(row[7]); //conversie char to int 
 
         if(nrtren1 != nr_tren ){
             if(!fin.eof()){
@@ -172,7 +298,7 @@ void deleteCursa()
         if(fin.eof()) break;
     }
 
-    if(count ==1 ) cout<<"Cursa cu nr  \n"<<row[0]<<"a fost stearsa";
+    if(count ==1 ) cout<<"Cursa cu nr  \n"<<row[7]<<"a fost stearsa";
     else cout<<"Nu s-a putut gasi cursa cu nr "<< nr_tren ;
 
     fin.close();
@@ -182,7 +308,6 @@ void deleteCursa()
     rename("trainsNew.csv","trains.csv");
 
 }
-
 
 bool isValid(const string& email)
 {
@@ -196,10 +321,9 @@ bool isValid(const string& email)
     return regex_match(email, pattern);
 }
   
-
 void Register()
 {
-        string username,parola,email,parola2;
+        std::string username,parola,email,parola2;
 
         cout<<"Introduceti username: ";
         cin>>username;
@@ -207,13 +331,10 @@ void Register()
         cin>>parola;
         cout<<"Reintroduceti parola: ";
         cin>>parola2;
-
-        
-
         cout<<"Introduceti emailul: ";
         cin>>email;
 
-        if(parola==parola2){
+            if(parola==parola2){
             bool ans = isValid(email);
             if(ans){
                 User User1(username,parola,email);
@@ -223,10 +344,12 @@ void Register()
         }
         else {
             cout<<"Parolele nu sunt indentice";
-        }
+             }
+        
+      
+        
         
 }
-
 
 int loginAdmin()
 {
@@ -253,9 +376,6 @@ int loginAdmin()
 
     fileAdmin.close();
 }
-
- 
-
 
 int loginUser()
 {
@@ -293,13 +413,13 @@ int loginUser()
 
         
 
-        myFileUser.close();
+       
     }
 
     if(adevarat) return true;
         else return false;
     
-   
+    myFileUser.close();
 
 }
 
@@ -366,15 +486,18 @@ int main() {
             {
                 case 1:
                 {
-                    afisareCursa();
+
+                         afisareCursa();
+                   
+                    
                 }
                 case 2:
                 {
-                    
+                    rezervareCursa();
                 }
             }
            }
-           else cout<<"Autentificare nereusita";
+           else cout<<"User sau parola introduse gresit";
            break;
        }
        case 2:
@@ -382,6 +505,7 @@ int main() {
            Register();
            break;
        }
+      
    }
 
 }
