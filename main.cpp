@@ -8,7 +8,9 @@
 using namespace std;
 
 
-class User{
+class User
+{
+
 private:
 
   string username;
@@ -38,7 +40,8 @@ public:
 
 };
 
-class Trains{
+class Trains
+{
 private:
     string orasPlecare;
     string orasDestinatie;
@@ -74,7 +77,8 @@ public:
 
 };
 
-void afisareCursa(){
+void afisareCursa()
+{
 
     fstream myfile;
 
@@ -87,7 +91,8 @@ void afisareCursa(){
 
     string line,word,cursa1;
     vector<string> row;
-
+    int afisare = 0;
+    static bool runOnce= true;
 
     while(!myfile.eof())
     {
@@ -103,16 +108,22 @@ void afisareCursa(){
          cursa1 = row[3];
 
         if(cursa1 == findCursa)
-        {
+        {   
+            if(runOnce){
+                cout<<"ZI - LUNA - AN || ORAS PLECARE -> ORAS DESTINATIE || ORA PLECARE -> ORA AJUNGERE \n";
+                runOnce=false;
+            }
+            if(myfile.eof()) break;
             cout<<row[0]<< "-"<< row[1]<< "-"<< row[2]<<"|| "<< row[3]<<" -> "<<row[4]<<"  ||  "<<row[5]<<"->"<<row[6]<<"|| NR CURSA:"<<row[7]<<"\n";
+            afisare=1;
             
             
         }
-        else {
-            throw "Cursa nu a fost gasita";
        
-        }
        
+    }
+    if(!afisare) {
+        cout<<"Nu exista curse de la orasul"<<findCursa;
     }
 
     myfile.close();
@@ -488,7 +499,7 @@ int main() {
                 {
 
                          afisareCursa();
-                   
+                         break;
                     
                 }
                 case 2:
